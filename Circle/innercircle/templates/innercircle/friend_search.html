@@ -1,0 +1,57 @@
+{% extends 'innercircle/base.html' %}
+
+{% block title %}Search Friends - InnerCircle{% endblock %}
+
+{% block content %}
+<h2 class="mb-4">
+  <i class="bi bi-person-plus me-2"></i>Find Friends
+</h2>
+
+<div class="row mb-4">
+  <div class="col-lg-6">
+    <form method="get" class="input-group input-group-lg">
+      <input 
+        type="text" 
+        name="q" 
+        class="form-control" 
+        placeholder="Search by username or email..." 
+        value="{{ query }}" 
+        minlength="2"
+      >
+      <button class="btn btn-primary" type="submit">
+        <i class="bi bi-search"></i> Search
+      </button>
+    </form>
+    <small class="form-text text-muted mt-2">Type at least 2 characters to search</small>
+  </div>
+</div>
+
+{% if results %}
+  <h5 class="mb-3">Found {{ results.count }} user{{ results.count|pluralize }}</h5>
+  <div class="list-group">
+    {% for user in results %}
+    <div class="list-group-item d-flex justify-content-between align-items-center">
+      <div class="d-flex align-items-center flex-grow-1">
+        <div class="user-avatar me-3">{{ user.username|first|upper }}</div>
+        <div>
+          <h6 class="mb-1">{{ user.get_full_name|default:user.username }}</h6>
+          <small class="text-muted">@{{ user.username }} • {{ user.email }}</small>
+        </div>
+      </div>
+      <a href="{% url 'friend_request_create' user.id %}" class="btn btn-primary btn-sm">
+        <i class="bi bi-person-plus me-1"></i>Add Friend
+      </a>
+    </div>
+    {% endfor %}
+  </div>
+{% elif query %}
+  <div class="alert alert-info text-center">
+    <i class="bi bi-search" style="font-size: 2rem; display: block; margin-bottom: 1rem;"></i>
+    <p class="mb-0">No users found matching "{{ query }}"</p>
+  </div>
+{% else %}
+  <div class="alert alert-secondary">
+    <i class="bi bi-info-circle me-2"></i>Start typing to search for users to add as friends!
+  </div>
+{% endif %}
+{% endblock %}

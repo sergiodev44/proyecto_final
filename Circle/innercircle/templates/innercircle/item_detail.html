@@ -1,0 +1,76 @@
+{% extends 'innercircle/base.html' %}
+
+{% block title %}{{ item.title }} - InnerCircle{% endblock %}
+
+{% block content %}
+<div class="row">
+  <div class="col-lg-6">
+    {% if item.photo %}
+      <img src="{{ item.photo.url }}" class="img-fluid rounded-lg" alt="{{ item.title }}">
+    {% else %}
+      <div class="bg-light rounded-lg d-flex align-items-center justify-content-center" style="height: 400px;">
+        <i class="bi bi-image" style="font-size: 4rem; color: #ccc;"></i>
+      </div>
+    {% endif %}
+  </div>
+  
+  <div class="col-lg-6">
+    <div class="d-flex justify-content-between align-items-start mb-3">
+      <div>
+        <h2>{{ item.title }}</h2>
+        <div class="mb-2">
+          <span class="badge bg-primary">{{ item.get_category_display }}</span>
+          <span class="badge bg-info">{{ item.get_condition_display }}</span>
+          {% if item.size %}
+            <span class="badge bg-secondary">Size: {{ item.get_size_display }}</span>
+          {% endif %}
+        </div>
+      </div>
+      {% if item.is_available %}
+        <span class="badge bg-success">Available</span>
+      {% else %}
+        <span class="badge bg-danger">Not Available</span>
+      {% endif %}
+    </div>
+    
+    <hr>
+    
+    <h5>Description</h5>
+    <p class="mb-4">{{ item.description|default:"No description provided." }}</p>
+    
+    <div class="card mb-4">
+      <div class="card-body">
+        <h6 class="card-title">Owner</h6>
+        <div class="d-flex align-items-center">
+          <div class="user-avatar me-3">{{ item.owner.username|first|upper }}</div>
+          <div>
+            <p class="mb-1"><strong>{{ item.owner.get_full_name|default:item.owner.username }}</strong></p>
+            <small class="text-muted">@{{ item.owner.username }}</small>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    {% if item.owner != user and item.is_available %}
+      <a href="{% url 'request_create' item.id %}" class="btn btn-primary btn-lg w-100">
+        <i class="bi bi-heart me-2"></i>Request Swap
+      </a>
+    {% elif item.owner == user %}
+      <div class="d-flex gap-2">
+        <a href="{% url 'item_update' item.id %}" class="btn btn-outline-secondary flex-grow-1">
+          <i class="bi bi-pencil me-2"></i>Edit
+        </a>
+        <a href="{% url 'item_delete' item.id %}" class="btn btn-outline-danger flex-grow-1" data-confirm-delete>
+          <i class="bi bi-trash me-2"></i>Delete
+        </a>
+      </div>
+    {% else %}
+      <div class="alert alert-warning">
+        <i class="bi bi-exclamation-triangle me-2"></i>This item is no longer available.
+      </div>
+    {% endif %}
+    
+    <p class="text-muted mt-3">Posted {{ item.created_at|date:'M d, Y' }}</p>
+  </div>
+</div>
+{% endblock %}

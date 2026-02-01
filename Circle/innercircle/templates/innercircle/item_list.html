@@ -1,0 +1,102 @@
+{% extends 'innercircle/base.html' %}
+
+{% block title %}Feed - InnerCircle{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h2 class=\"mb-0\">
+    <i class="bi bi-house-fill me-2"></i>Friends Feed
+  </h2>
+  <a class="btn btn-primary" href="{% url 'item_create' %}\">
+    <i class="bi bi-plus-circle me-2"></i>Post Item
+  </a>
+</div>
+
+{% if page_obj %}
+  <div class="item-grid">
+    {% for item in page_obj %}
+    <div class="card item-card h-100\">
+      {% if item.photo %}
+      <img src="{{ item.photo.url }}" class="card-img-top\" alt="{{ item.title }}">
+      {% else %}
+      <div class="bg-secondary\" style="height: 250px; display: flex; align-items: center; justify-content: center;\">
+        <i class="bi bi-image\" style="font-size: 3rem; color: white;\"></i>
+      </div>
+      {% endif %}
+      
+      <div class=\"badge availability-badge {% if not item.is_available %}unavailable{% endif %}\">
+        {% if item.is_available %}Available{% else %}Not Available{% endif %}
+      </div>
+      
+      <div class="card-body d-flex flex-column\">
+        <h5 class="card-title\">{{ item.title }}</h5>
+        <p class="card-text text-muted small\">{{ item.description|truncatechars:100 }}</p>
+        
+        <div class="item-meta mb-2\">
+          <span><strong>{{ item.get_category_display }}</strong></span>
+          <span>{{ item.get_condition_display }}</span>
+        </div>
+        
+        {% if item.size %}
+        <div class="item-meta mb-3\">
+          <span><i class="bi bi-tag\"></i> Size: {{ item.get_size_display }}</span>
+        </div>
+        {% endif %}
+        
+        <div class="item-meta mb-3 pb-3 border-bottom\">
+          <small class="text-muted\">{{ item.created_at|date:'SHORT_DATE_FORMAT' }}</small>
+        </div>
+        
+        <div class="mt-auto\">
+          <div class="d-flex align-items-center mb-3\">
+            <div class="user-avatar me-2\">{{ item.owner.username|first|upper }}</div>
+            <small class="text-muted\">{{ item.owner.username }}</small>
+          </div>
+          
+          {% if item.is_available and item.owner != user %}
+          <a href="{% url 'request_create' item.id %}" class="btn btn-primary btn-sm w-100\">
+            <i class="bi bi-heart me-1\"></i>Request Swap
+          </a>
+          {% elif item.is_available and item.owner == user %}
+          <div class="d-flex gap-2\">
+            <a href="{% url 'item_update' item.id %}" class="btn btn-outline-secondary btn-sm flex-grow-1\">Edit</a>
+            <a href="{% url 'item_delete' item.id %}" class="btn btn-outline-danger btn-sm flex-grow-1\" data-confirm-delete>Delete</a>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  
+  {% if page_obj.has_other_pages %}
+  <nav aria-label="Page navigation\">
+    <ul class="pagination\">
+      {% if page_obj.has_previous %}
+        <li class="page-item\"><a class="page-link\" href="?page=1\">First</a></li>
+        <li class="page-item\"><a class="page-link\" href="?page={{ page_obj.previous_page_number }}\">Previous</a></li>
+      {% endif %}
+      
+      {% for num in page_obj.paginator.page_range %}
+        {% if page_obj.number == num %}
+          <li class="page-item active\"><span class="page-link\">{{ num }}</span></li>
+        {% else %}
+          <li class="page-item\"><a class="page-link\" href="?page={{ num }}\">{{ num }}</a></li>
+        {% endif %}
+      {% endfor %}
+      
+      {% if page_obj.has_next %}
+        <li class="page-item\"><a class="page-link\" href="?page={{ page_obj.next_page_number }}\">Next</a></li>
+        <li class="page-item\"><a class="page-link\" href="?page={{ page_obj.paginator.num_pages }}\">Last</a></li>
+      {% endif %}
+    </ul>
+  </nav>
+  {% endif %}
+{% else %}
+  <div class="alert alert-info text-center py-4\">
+    <i class="bi bi-inbox\" style="font-size: 2rem; display: block; margin-bottom: 1rem;\"></i>
+    <p class="mb-0\">No items to display. Start adding friends to see their items!</p>
+    <a href="{% url 'friend_search' %}\" class="btn btn-primary btn-sm mt-3\">Find Friends</a>
+  </div>
+{% endif %}
+{% endblock %}
